@@ -61,6 +61,13 @@ def unrealized_pnl(position: Position, mark_price: Decimal) -> Decimal:
     return position.market_value(mark_price) - position.cost_basis
 
 
+def average_trade_size(trades: list[Trade]) -> Decimal:
+    """Mean quantity across `trades`, or zero when there are none."""
+    if not trades:
+        return ZERO
+    return sum((trade.quantity for trade in trades), ZERO) / len(trades)
+
+
 def portfolio_value(positions: Iterable[Position], marks: dict[str, Decimal]) -> Decimal:
     """Total market value. Symbols without a mark are valued at cost.
 

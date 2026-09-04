@@ -3,7 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from ledger.models import Position
-from ledger.pricing import build_position, realized_pnl, unrealized_pnl
+from ledger.pricing import average_trade_size, build_position, realized_pnl, unrealized_pnl
 
 
 def test_single_buy_sets_average_to_the_fill_price(make_trade):
@@ -72,3 +72,20 @@ def test_unrealized_pnl_marks_the_open_position():
     position = Position("ACME", Decimal("60"), Decimal("10.00"))
     assert unrealized_pnl(position, Decimal("12.00")) == Decimal("120.00")
     assert unrealized_pnl(position, Decimal("8.00")) == Decimal("-120.00")
+
+
+def test_average_trade_size_averages_quantities(make_trade):
+    trades = [
+        make_trade("ACME", "buy", "100", "10.00", 0),
+        make_trade("ACME", "sell", "40", "15.00", 1),
+        make_trade("OTHER", "buy", "10", "1.00", 2),
+    ]
+    assert average_trade_size(trades) == Decimal("50")
+
+
+def test_average_trade_size_of_a_single_trade_is_its_quantity(make_trade):
+    assert average_trade_size([make_trade("ACME", "buy", "100", "10.00")]) == Decimal("100")
+
+
+def test_average_trade_size_is_zero_for_no_trades():
+    assert average_trade_size([]) == Decimal("0")
