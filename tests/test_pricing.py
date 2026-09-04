@@ -3,7 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from ledger.models import Position
-from ledger.pricing import build_position, realized_pnl, unrealized_pnl
+from ledger.pricing import build_position, realized_pnl, total_pnl, unrealized_pnl
 
 
 def test_single_buy_sets_average_to_the_fill_price(make_trade):
@@ -72,3 +72,19 @@ def test_unrealized_pnl_marks_the_open_position():
     position = Position("ACME", Decimal("60"), Decimal("10.00"))
     assert unrealized_pnl(position, Decimal("12.00")) == Decimal("120.00")
     assert unrealized_pnl(position, Decimal("8.00")) == Decimal("-120.00")
+
+
+def test_total_pnl_is_just_realized_when_the_position_is_closed(make_trade):
+    trades = [
+        make_trade("ACME", "buy", "100", "10.00", 0),
+        make_trade("ACME", "sell", "100", "15.00", 1),
+    ]
+    assert total_pnl("ACME", trades, Decimal("12.00")) == Decimal("500.00")
+
+
+def test_total_pnl_adds_realized_and_unrealized(make_trade):
+    trades = [
+        make_trade("ACME", "buy", "100", "10.00", 0),
+        make_trade("ACME", "sell", "40", "15.00", 1),
+    ]
+    assert total_pnl("ACME", trades, Decimal("12.00")) == Decimal("320.00")
