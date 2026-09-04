@@ -61,6 +61,13 @@ def unrealized_pnl(position: Position, mark_price: Decimal) -> Decimal:
     return position.market_value(mark_price) - position.cost_basis
 
 
+def total_pnl(symbol: str, trades: Iterable[Trade], mark_price: Decimal) -> Decimal:
+    """Realised profit plus paper profit on the open position at `mark_price`."""
+    trades = list(trades)
+    position = build_position(symbol, trades)
+    return realized_pnl(symbol, trades) + unrealized_pnl(position, mark_price)
+
+
 def portfolio_value(positions: Iterable[Position], marks: dict[str, Decimal]) -> Decimal:
     """Total market value. Symbols without a mark are valued at cost.
 
