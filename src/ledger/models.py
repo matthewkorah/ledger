@@ -27,6 +27,12 @@ class Trade:
     executed_at: datetime
     id: int | None = None
 
+    def __post_init__(self) -> None:
+        if self.quantity <= 0:
+            raise ValueError(f"quantity must be positive, got {self.quantity}")
+        if self.price <= 0:
+            raise ValueError(f"price must be positive, got {self.price}")
+
     @property
     def notional(self) -> Decimal:
         return self.quantity * self.price
